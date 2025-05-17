@@ -4,6 +4,20 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedMode = localStorage.getItem("darkMode") === "true";
+    setIsDarkMode(savedMode);
+    document.documentElement.classList.toggle("dark", savedMode);
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem("darkMode", newMode);
+    document.documentElement.classList.toggle("dark", newMode);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,14 +85,9 @@ const Navbar = () => {
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
           <div
-            className="text-white font-bold text-4xl mr-3 cursor-pointer flex items-center transform transition-transform duration-300 hover:scale-105 hover:scale-110"
+            className="text-white font-bold text-4xl mr-3 cursor-pointer flex items-center transform transition-transform duration-300 hover:scale-110"
             onClick={scrollToTop}
           >
-            {/*<img
-              src={`${process.env.PUBLIC_URL}/Imagenes/logo.png`} // Asegúrate que este archivo esté en public/
-              alt="Logo China"
-              className="w-12 h-12 object-contain"
-            />*/}
             <span className="italic">ViajeChina</span>
             <span className="text-yellow-400">con</span>
             <span className="italic mr-2">Lulu</span>
@@ -86,8 +95,8 @@ const Navbar = () => {
         </div>
 
         {/* Menú desktop */}
-        <nav className="hidden md:block">
-          <ul className="flex space-x-8">
+        <nav className="hidden md:flex items-center space-x-6">
+          <ul className="flex space-x-6">
             {[
               "destinations",
               "tours",
@@ -118,10 +127,83 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
+
+          {/* Botón Dark Mode */}
+          <button
+            onClick={toggleDarkMode}
+            className="ml-4 text-white hover:text-yellow-400 transition-colors"
+            title="Modo Oscuro"
+          >
+            {isDarkMode ? (
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3v1m0 16v1m9-9h1M4 12H3m15.36 6.36l-.71-.71M6.34 6.34l-.71-.71m12.02 0l-.71.71M6.34 17.66l-.71.71M21 12a9 9 0 11-9-9"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
+                />
+              </svg>
+            )}
+          </button>
         </nav>
 
-        {/* Botón del menú móvil */}
-        <div className="md:hidden">
+        {/* Menú móvil */}
+        <div className="md:hidden flex items-center">
+          <button
+            onClick={toggleDarkMode}
+            className="mr-4 text-white hover:text-yellow-400"
+            title="Modo Oscuro"
+          >
+            {isDarkMode ? (
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3v1m0 16v1m9-9h1M4 12H3m15.36 6.36l-.71-.71M6.34 6.34l-.71-.71m12.02 0l-.71.71M6.34 17.66l-.71.71M21 12a9 9 0 11-9-9"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
+                />
+              </svg>
+            )}
+          </button>
+
           <button
             className="text-white focus:outline-none"
             onClick={toggleMobileMenu}
@@ -148,54 +230,23 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-black bg-opacity-95 absolute top-full left-0 w-full z-40">
           <ul className="flex flex-col items-center space-y-4 py-4">
-            <li>
-              <button
-                onClick={() => handleMobileLinkClick("destinations")}
-                className="text-white hover:text-yellow-400"
-              >
-                Destinos
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleMobileLinkClick("tours")}
-                className="text-white hover:text-yellow-400"
-              >
-                Tours
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleMobileLinkClick("gallery")}
-                className="text-white hover:text-yellow-400"
-              >
-                Galería
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleMobileLinkClick("videos")}
-                className="text-white hover:text-yellow-400"
-              >
-                Videos
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleMobileLinkClick("testimonials")}
-                className="text-white hover:text-yellow-400"
-              >
-                Reseñas
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleMobileLinkClick("contact")}
-                className="text-white hover:text-yellow-400"
-              >
-                Contacto
-              </button>
-            </li>
+            {[
+              "destinations",
+              "tours",
+              "gallery",
+              "videos",
+              "testimonials",
+              "contact",
+            ].map((section) => (
+              <li key={section}>
+                <button
+                  onClick={() => handleMobileLinkClick(section)}
+                  className="text-white hover:text-yellow-400"
+                >
+                  {section.charAt(0).toUpperCase() + section.slice(1)}
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
       )}

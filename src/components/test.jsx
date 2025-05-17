@@ -1,169 +1,313 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { FaUser, FaEnvelope, FaCommentDots } from "react-icons/fa";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import SvgIcon from "@mui/material/SvgIcon";
+import { IconButton, Modal, Box } from "@mui/material";
+import {
+  MarkEmailRead,
+  NearMe,
+  ContactMail,
+  Navigation,
+} from "@mui/icons-material";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { AutoAwesome } from "@mui/icons-material";
-import ReviewForm from "./ReviewForm";
-import { db, collection, getDocs } from "../Firebase";
-import { Rating, Box } from "@mui/material";
+import emailjs from "@emailjs/browser";
 
-// Imagen por defecto si no hay imagen del usuario
-const defaultImage =
-  "https://media.giphy.com/media/26gsspf0Cj8Z6lWVa/giphy.gif";
+// Íconos personalizados
+const WeChatIcon = (props) => (
+  <SvgIcon {...props}>
+    <path d="M20 2H4a2 2 0 00-2 2v16l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zM7 9a1 1 0 110-2 1 1 0 010 2zm5 0a1 1 0 110-2 1 1 0 010 2zm3 4a1 1 0 110-2 1 1 0 010 2zm-6 0a1 1 0 110-2 1 1 0 010 2z" />
+  </SvgIcon>
+);
 
-const TestimonialsCarousel = () => {
-  const [testimonialsData, setTestimonialsData] = useState([]);
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
+const TikTokIcon = (props) => (
+  <SvgIcon {...props}>
+    <path d="M16 1h2a5 5 0 005 5v2a7 7 0 01-5-2v8.5A5.5 5.5 0 0112.5 20 5.5 5.5 0 0110 9.7V7h2v2.7A3.5 3.5 0 0015 13V1z" />
+  </SvgIcon>
+);
+
+const ContactSection = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [wechatOpen, setWeChatOpen] = useState(false);
+
+  const formRef = useRef(null);
+  const imgRef = useRef(null);
 
   useEffect(() => {
-    AOS.init({ duration: 1000 });
+    AOS.init({ once: false });
   }, []);
 
-  const fetchTestimonials = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "reviews"));
-      const testimonials = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setTestimonialsData(testimonials);
-
-      // Mostrar directamente el comentario recién agregado (el último)
-      if (testimonials.length > 0) {
-        setCurrentTestimonial(testimonials.length - 1);
+  useEffect(() => {
+    const resizeImgHeight = () => {
+      if (formRef.current && imgRef.current) {
+        imgRef.current.style.height = `${formRef.current.offsetHeight}px`;
       }
-    } catch (error) {
-      console.error("Error al obtener testimonios:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchTestimonials();
+    };
+    resizeImgHeight();
+    window.addEventListener("resize", resizeImgHeight);
+    return () => window.removeEventListener("resize", resizeImgHeight);
   }, []);
 
-  useEffect(() => {
-    let interval;
-    if (isAutoPlay && testimonialsData.length > 0) {
-      interval = setInterval(() => {
-        setCurrentTestimonial((prev) =>
-          prev === testimonialsData.length - 1 ? 0 : prev + 1
-        );
-      }, 4000);
-    }
-    return () => clearInterval(interval);
-  }, [isAutoPlay, testimonialsData]);
-
-  const goToTestimonial = (index) => {
-    setCurrentTestimonial(index);
-    setIsAutoPlay(false);
-    setTimeout(() => setIsAutoPlay(true), 10000);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const prevTestimonial = () => {
-    goToTestimonial(
-      currentTestimonial === 0
-        ? testimonialsData.length - 1
-        : currentTestimonial - 1
-    );
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    emailjs
+      .send(
+        "smtp_126_com",
+        "template_ofb8gxk",
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: formData.message,
+        },
+        "pzhHRfLyK6EyDiEcf"
+      )
+      .then(
+        (result) => {
+          setIsSubmitting(false);
+          setSubmitStatus("success");
+          setFormData({ name: "", email: "", message: "" });
+          setTimeout(() => setSubmitStatus(null), 5000);
+        },
+        (error) => {
+          setIsSubmitting(false);
+          setSubmitStatus("error");
+        }
+      );
   };
-
-  const nextTestimonial = () => {
-    goToTestimonial(
-      currentTestimonial === testimonialsData.length - 1
-        ? 0
-        : currentTestimonial + 1
-    );
-  };
-
-  if (testimonialsData.length === 0) {
-    return (
-      <p className="text-white text-center mt-10">Cargando testimonios...</p>
-    );
-  }
-
-  const testimonial = testimonialsData[currentTestimonial];
 
   return (
-    <section id="testimonials" className="py-20">
-      <div className="container mx-auto px-4">
-        <div className="text-center lg:mb-8 mb-2 px-[5%]">
-          <div className="inline-block relative group">
-            <h2
-              className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]"
-              data-aos="zoom-in-up"
-            >
-              Lo que dicen nuestros clientes
-            </h2>
-          </div>
-          <p
-            className="mt-2 text-white max-w-2xl mx-auto text-base sm:text-lg flex items-center justify-center gap-2"
-            data-aos="zoom-in-up"
-          >
-            <AutoAwesome className="w-5 h-5 text-yellow-400" />
-            Reseñas de nuestros clientes que disfrutaron de nuestros tours
-            profesionales
-            <AutoAwesome className="w-5 h-5 text-yellow-400" />
-          </p>
-        </div>
-
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-          <div className="w-full md:w-1/2">
-            <ReviewForm onReviewSubmitted={fetchTestimonials} />
-          </div>
-
+    <>
+      <section
+        id="contact"
+        className="py-24 bg-gradient-to-br to-gray-100 relative overflow-hidden mb-24"
+      >
+        <div className="container mx-auto px-6 lg:flex lg:items-start lg:justify-between">
+          {/* FORMULARIO */}
           <div
-            className="w-full md:w-1/2 bg-transparent rounded-xl shadow-lg p-8 relative overflow-hidden z-10"
-            data-aos="fade-left"
+            ref={formRef}
+            className="bg-white rounded-3xl shadow-2xl p-10 lg:w-1/2 z-10"
+            data-aos="fade-up"
+            data-aos-duration="1000"
           >
-            <div className="flex justify-center mb-4">
-              <img
-                src={testimonial.imageUrl || defaultImage}
-                alt={testimonial.name}
-                className="w-24 h-24 rounded-full object-cover shadow-md"
+            <h2 className="text-4xl font-extrabold mb-10 text-gray-800 text-center tracking-tight select-none drop-shadow-lg">
+              Contáctanos
+              <ContactMail
+                className="text-red-500 ml-2 drop-shadow-lg"
+                fontSize="large"
               />
-            </div>
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {[
+                {
+                  icon: <FaUser />,
+                  name: "name",
+                  placeholder: "Tu nombre",
+                  type: "text",
+                },
+                {
+                  icon: <FaEnvelope />,
+                  name: "email",
+                  placeholder: "Tu correo electrónico",
+                  type: "email",
+                },
+              ].map(({ icon, name, placeholder, type }) => (
+                <div key={name} className="relative">
+                  <div className="absolute left-4 top-4 text-gray-500 drop-shadow-md text-lg">
+                    {icon}
+                  </div>
+                  <input
+                    type={type}
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    required
+                    placeholder={placeholder}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-yellow-500/50 focus:outline-none transition-all text-lg font-semibold"
+                  />
+                </div>
+              ))}
+              <div className="relative">
+                <FaCommentDots className="absolute left-4 top-4 text-gray-500 drop-shadow-md text-lg" />
+                <textarea
+                  name="message"
+                  rows="5"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  placeholder="Tu mensaje"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-yellow-500/50 focus:outline-none transition-all resize-none text-lg font-semibold"
+                ></textarea>
+              </div>
 
-            <div className="flex justify-center mb-2">
-              {/* Usar Rating de Material UI */}
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Rating
-                  name="read-only"
-                  value={testimonial.rating}
-                  precision={0.5}
-                  readOnly
-                  size="large"
-                  sx={{ color: "#fbbf24" }} // Color amarillo
-                />
-                <Box sx={{ ml: 2 }}>{testimonial.rating}</Box>
-              </Box>
-            </div>
+              <motion.button
+                type="submit"
+                disabled={isSubmitting}
+                whileTap={{ scale: 0.97 }}
+                className={`w-full py-3 px-6 rounded-xl font-bold text-white transition-all duration-500 shadow-lg ${
+                  isSubmitting
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-yellow-500 to-pink-500 hover:from-yellow-600 hover:to-pink-600 shadow-xl hover:shadow-2xl"
+                }`}
+              >
+                {isSubmitting ? "Enviando..." : "Enviar Mensaje"}
+                {isSubmitting ? (
+                  <Navigation className="w-4 h-4 ml-2 inline-block" />
+                ) : (
+                  <NearMe className="w-4 h-4 ml-2 inline-block" />
+                )}
+              </motion.button>
 
-            <p className="text-white text-lg italic text-center mt-4">
-              "{testimonial.comment}"
-            </p>
+              {submitStatus === "success" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-3 bg-green-100 text-green-700 rounded-xl text-center shadow"
+                >
+                  ¡Mensaje enviado con éxito!
+                  <MarkEmailRead className="w-4 h-4 ml-2 inline-block" />
+                </motion.div>
+              )}
+
+              {submitStatus === "error" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-3 bg-red-100 text-red-700 rounded-xl text-center shadow"
+                >
+                  Hubo un error al enviar el mensaje. Inténtalo de nuevo.
+                </motion.div>
+              )}
+            </form>
+
+            {/* REDES SOCIALES */}
+            <div className="mt-10" data-aos="fade-up" data-aos-delay="200">
+              <h3 className="text-center text-xl font-extrabold text-gray-800 dark:text-white mb-6 tracking-wide select-none drop-shadow-md">
+                Síguenos en:
+              </h3>
+              <div className="flex flex-wrap justify-center gap-8">
+                {[
+                  {
+                    icon: <InstagramIcon fontSize="large" />,
+                    href: "https://www.instagram.com/viajechinaconlulu?igsh=Z3BycXl6M3JicWly&utm_source=qr",
+                    color: "#E1306C",
+                    label: "Instagram",
+                  },
+                  {
+                    icon: <FacebookIcon fontSize="large" />,
+                    href: "https://www.facebook.com/viajechinaconlulu",
+                    color: "#1877F2",
+                    label: "Facebook",
+                  },
+                  {
+                    icon: <WhatsAppIcon fontSize="large" />,
+                    href: "https://wa.me/8613683676407?text=Hola,%20estoy%20interesado%20en%20tus%20viajes%20a%20China.",
+                    color: "#25D366",
+                    label: "WhatsApp",
+                  },
+                  {
+                    icon: <WeChatIcon fontSize="large" />,
+                    onClick: () => setWeChatOpen(true),
+                    color: "#09b83e",
+                    label: "WeChat",
+                  },
+                  {
+                    icon: <TikTokIcon fontSize="large" />,
+                    href: "https://www.tiktok.com/@viajechinaconlulu666",
+                    color: "#010101",
+                    label: "TikTok",
+                  },
+                  {
+                    icon: <YouTubeIcon fontSize="large" />,
+                    href: "https://www.youtube.com/@Viajechinaconlulu",
+                    color: "#FF0000",
+                    label: "YouTube",
+                  },
+                ].map((social, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center w-20 min-w-[80px] group cursor-pointer"
+                  >
+                    <IconButton
+                      aria-label={social.label}
+                      href={social.href}
+                      onClick={social.onClick}
+                      target={social.href ? "_blank" : undefined}
+                      sx={{
+                        color: social.color,
+                        transition: "transform 0.3s ease, filter 0.3s ease",
+                        "&:hover": {
+                          transform: "scale(1.4) rotate(10deg)",
+                          filter: `drop-shadow(0 0 15px ${social.color})`,
+                        },
+                      }}
+                    >
+                      {social.icon}
+                    </IconButton>
+                    <motion.span
+                      initial={{ scale: 1, color: "#4B5563" }}
+                      whileHover={{
+                        scale: 1.2,
+                        color: social.color,
+                        textShadow: `0 0 8px ${social.color}`,
+                      }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="text-sm font-extrabold select-none"
+                    >
+                      {social.label}
+                    </motion.span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-
-          <div className="flex justify-between w-full mt-8">
-            <button
-              onClick={prevTestimonial}
-              className="bg-gray-600 text-white p-3 rounded-full"
-            >
-              <ArrowBackIosNewIcon />
-            </button>
-            <button
-              onClick={nextTestimonial}
-              className="bg-gray-600 text-white p-3 rounded-full"
-            >
-              <ArrowForwardIosIcon />
-            </button>
+          {/* Imagen o GIF */}
+          <div
+            ref={imgRef}
+            className="hidden lg:flex lg:w-1/2 items-center justify-center relative"
+            data-aos="fade-left"
+            data-aos-duration="1000"
+          >
+            <img
+              src={`${process.env.PUBLIC_URL}/Imagenes/greatwall.gif`}
+              alt="Contáctanos"
+              className="object-cover rounded-3xl shadow-2xl w-full h-full"
+            />
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* MODAL PARA QR DE WECHAT */}
+      <Modal open={wechatOpen} onClose={() => setWeChatOpen(false)}>
+        <Box className="bg-white p-6 rounded-xl shadow-lg max-w-sm mx-auto mt-40 text-center">
+          <h4 className="text-lg font-bold mb-4">
+            Escanea el código QR para añadirnos en WeChat
+          </h4>
+          <img
+            src="/qr_wechat_lulu.png"
+            alt="Código QR de WeChat"
+            className="w-64 h-64 mx-auto rounded"
+          />
+        </Box>
+      </Modal>
+    </>
   );
 };
 
-export default TestimonialsCarousel;
+export default ContactSection;

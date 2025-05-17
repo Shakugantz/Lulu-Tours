@@ -125,10 +125,7 @@ const TestimonialsCarousel = () => {
             <ReviewForm onReviewSubmitted={fetchTestimonials} />
           </div>
 
-          <div
-            className="w-full md:w-1/2 bg-transparent rounded-xl shadow-lg p-8 relative overflow-hidden z-10"
-            data-aos="fade-left"
-          >
+          <div className="w-full md:w-1/2 p-4" data-aos="fade-left">
             <div className="flex justify-center mb-4">
               <img
                 src={testimonial.imageUrl || defaultImage}
@@ -154,7 +151,7 @@ const TestimonialsCarousel = () => {
             <p className="text-white italic text-center text-xl mb-6 z-10">
               "{testimonial.comment}"
             </p>
-            <p className="font-bold text-center text-gray-800 text-lg">
+            <p className="font-bold text-center text-gray-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-[#6366f1] dark:to-[#a855f7] text-lg">
               - {testimonial.name}
             </p>
 
