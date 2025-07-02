@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/Lulu-Tours/static/css/main.f8c2d89c.css",
-    "main.js": "/Lulu-Tours/static/js/main.d041c01f.js",
+    "main.css": "/Lulu-Tours/static/css/main.63437ec3.css",
+    "main.js": "/Lulu-Tours/static/js/main.f5c48e41.js",
     "static/js/453.7d76bbcb.chunk.js": "/Lulu-Tours/static/js/453.7d76bbcb.chunk.js",
     "static/media/slick.svg": "/Lulu-Tours/static/media/slick.2630a3e3eab21c607e21.svg",
     "static/media/slick.eot": "/Lulu-Tours/static/media/slick.a4e97f5a2a64f0ab1323.eot",
     "static/media/slick.ttf": "/Lulu-Tours/static/media/slick.c94f7671dcc99dce43e2.ttf",
     "static/media/slick.woff": "/Lulu-Tours/static/media/slick.295183786cd8a1389865.woff",
     "index.html": "/Lulu-Tours/index.html",
-    "main.f8c2d89c.css.map": "/Lulu-Tours/static/css/main.f8c2d89c.css.map",
-    "main.d041c01f.js.map": "/Lulu-Tours/static/js/main.d041c01f.js.map",
+    "main.63437ec3.css.map": "/Lulu-Tours/static/css/main.63437ec3.css.map",
+    "main.f5c48e41.js.map": "/Lulu-Tours/static/js/main.f5c48e41.js.map",
     "453.7d76bbcb.chunk.js.map": "/Lulu-Tours/static/js/453.7d76bbcb.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f8c2d89c.css",
-    "static/js/main.d041c01f.js"
+    "static/css/main.63437ec3.css",
+    "static/js/main.f5c48e41.js"
   ]
 }
